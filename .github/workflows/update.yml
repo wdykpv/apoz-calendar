@@ -1,0 +1,31 @@
+name: Update APOZ Calendar
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download calendar
+        run: |
+          curl -L "https://s.apoz.edu.pl/apoz/planeta/?vcalendar=1&planeta_short=Dyk.Wo" -o apoz.ics
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add apoz.ics
+
+          git diff --staged --quiet || \
+          (git commit -m "Calendar update" && git push)
